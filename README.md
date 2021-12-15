@@ -1,2 +1,2 @@
-# curso-cubo
+# Curso CUBO (2ª turma)
  
