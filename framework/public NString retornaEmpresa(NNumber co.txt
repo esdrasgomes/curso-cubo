@@ -1,0 +1,21 @@
+public NString retornaEmpresa(NNumber codigoEmpresa){
+NString descEmpresa = NString.getNull();
+
+String sqlRetornaDescEmpresa = "SELECT ds_multi_empresa FROM dbamv.multi_empresas WHERE sn_ativo = 'S' and cd_multi_empresa = :P_CD_MULTI_EMPRESA";
+
+DataCursor cRetornaDescEmpresa = new DataCursor(sqlRetornaDescEmpresa);
+
+try {
+cRetornaDescEmpresa.addParameter("P_CD_MULTI_EMPRESA", codigoEmpresa);
+cRetornaDescEmpresa.open();
+ResultSet cRetornaDescEmpresaResult = cRetornaDescEmpresa.fetchInto();
+if(cRetornaDescEmpresaResult != null){
+descEmpresa = cRetornaDescEmpresaResult.getStr(0);
+}
+} finally {
+cRetornaDescEmpresa.close();
+}
+return descEmpresa;
+}
+
+// SERVICES

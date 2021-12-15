@@ -1,0 +1,170 @@
+CREATE OR REPLACE PROCEDURE prc_TESTE_123 AS
+
+CURSOR C_DADOS (p_PACIENTE NUMBER) IS   SELECT REG_AMB.vl_total_conta
+                                            FROM ATENDIME
+                                            , REG_AMB
+                                            , ITREG_AMB
+                                            WHERE ATENDIME.CD_ATENDIMENTO = ITREG_AMB.CD_ATENDIMENTO 
+                                            AND REG_AMB.CD_REG_AMB = ITREG_AMB.CD_REG_AMB
+                                            AND ATENDIME.CD_PACIENTE = P_PACIENTE;
+
+CURSOR PACI IS  SELECT CD_PACIENTE
+                  FROM paci_treina_sql2;
+
+V_PACIENTE NUMBER(20);
+v_CONTA NUMBER(10,2);
+
+BEGIN
+
+
+    OPEN  PACI;   ---- ABRIR DO CURSOR (EXECUTAR O SELECT DO CURSOR)
+     LOOP            ---->>> INICIO DO LOOP
+        fetch PACI into V_PACIENTE;  ---- COLOCANDO OS DADOS DAQUELA LINHA DO CURSOR NA VARIAVEL
+        exit when PACI%notfound;  ---->>>> CAUSULA DE SAIDA
+
+        OPEN C_DADOS(V_PACIENTE); ---- ABRIU CURSOR COM A VARIAVEL COMO PARAMENTRO
+        FETCH C_DADOS INTO v_CONTA;   ----- COLOQUEI O RESULTADO DO CURSOR NA VARIAVEL V_CONTA
+        CLOSE C_DADOS;
+
+         UPDATE paci_treina_sql2
+         SET valor_conta = v_CONTA
+         WHERE CD_PACIENTE = V_PACIENTE;
+
+         COMMIT  ;
+
+    end loop; ------>>>>> FIM DO LOOP
+
+    CLOSE PACI;
+ 
+
+ END;
+/
+           
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------          
+-----------------------------------------------------------------------------------------------------------------------------------
+
+CREATE OR REPLACE PROCEDURE prc_LETRA_PACI (P_LETRA VARCHAR2) AS
+
+ 
+
+CURSOR C_DADOS IS
+
+ 
+
+SELECT cd_paciente    
+, cd_cidade   
+,cd_dis_san   
+,tp_situacao  
+,nm_mnemonico   
+, nm_PACIENTE
+FROM  paciente
+WHERE SubStr(NM_PACIENTE,0,1) = P_LETRA;
+
+ 
+
+vcursor_dados  C_DADOS%rowtype;
+
+ 
+
+BEGIN
+
+ 
+
+
+    OPEN  C_DADOS;   ---- ABRIR DO CURSOR (EXECUTAR O SELECT DO CURSOR)
+     LOOP            ---->>> INICIO DO LOOP
+        fetch C_DADOS into vcursor_dados;  ---- COLOCANDO OS DADOS DAQUELA LINHA DO CURSOR NA VARIAVEL
+        exit when C_DADOS%notfound;  ---->>>> CAUSULA DE SAIDA
+
+ 
+
+  INSERT INTO paci_treina_sql2
+      VALUES (   vcursor_dados.cd_paciente    
+                , vcursor_dados.cd_cidade   
+                , vcursor_dados.cd_dis_san   
+                , vcursor_dados.tp_situacao  
+                , vcursor_dados.nm_mnemonico   
+                , vcursor_dados.nm_PACIENTE  );
+
+ 
+
+         COMMIT  ;
+
+ 
+
+    end loop; ------>>>>> FIM DO LOOP
+
+ 
+
+    CLOSE C_DADOS;
+ 
+
+ 
+
+ END;
+/
+         
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------          
+-----------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE OR REPLACE PROCEDURE prc_COPIA_PACIENTE (P_SEXO VARCHAR2, P_LETRA VARCHAR2) AS
+
+CURSOR C_DADOS IS
+
+SELECT cd_paciente    
+, cd_cidade   
+,cd_dis_san   
+,tp_situacao  
+,nm_mnemonico   
+, nm_PACIENTE
+FROM  paciente
+WHERE SubStr(NM_PACIENTE,0,1) = P_LETRA;
+
+vcursor_dados  C_DADOS%rowtype;
+
+BEGIN
+
+DELETE PACI_CUBO2_MATHEUS_pRC 
+WHERE TP_SEXO = P_SEXO;
+
+
+-------------LOOP DO INSERT DE PACIENTES-----------------------------
+
+
+    OPEN  C_DADOS;   ---- ABRIR DO CURSOR (EXECUTAR O SELECT DO CURSOR)
+     LOOP            ---->>> INICIO DO LOOP
+        fetch C_DADOS into vcursor_dados;  ---- COLOCANDO OS DADOS DAQUELA LINHA DO CURSOR NA VARIAVEL
+        exit when C_DADOS%notfound;  ---->>>> CAUSULA DE SAIDA
+
+ 
+
+  INSERT INTO paci_treina_sql2
+      VALUES (   vcursor_dados.cd_paciente    
+                , vcursor_dados.cd_cidade   
+                , vcursor_dados.cd_dis_san   
+                , vcursor_dados.tp_situacao  
+                , vcursor_dados.nm_mnemonico   
+                , vcursor_dados.nm_PACIENTE  );
+
+ 
+
+         COMMIT  ;
+
+ 
+
+    end loop; ------>>>>> FIM DO LOOP
+
+    CLOSE C_DADOS;
+ 
+-------------LOOP DO INSERT DE PACIENTES-----------------------------
+
+
+ END;
+/

@@ -1,0 +1,79 @@
+CREATE OR REPLACE FUNCTION fnc_retorna_ocupa_leito
+
+ ( p_atendimento IN NUMBER, p_leito IN NUMBER)   RETURN VARCHAR2 IS
+
+
+ CURSOR tempo IS  SELECT Round(sum(hr_lib_mov - hr_mov_int),2)
+                  from mov_int
+                  WHERE cd_atendimento = p_atendimento
+                  AND cd_leito = p_leito;
+
+  variavel_A VARCHAR2(50);
+
+BEGIN
+
+  OPEN TEMPO; ---- ABRINDO O CURSOR = EXECUTAR O SELECT
+  FETCH TEMPO INTO VARIAVEL_A; ---ALIMENTADO A VARIAVEL COM O RSULTADO DO CURSOR
+  CLOSE TEMPO;  ----- FECHANDO CURSOR
+
+  IF VARIAVEL_A IS NULL THEN VARIAVEL_A:='ATENDIMENTO NAO ENCONTRADO';
+
+  END IF;
+
+  RETURN  variavel_A;  ----- RETORNAR O VALOR SALVO NA VARIAVEL
+
+END;
+/
+  ------------------------------------------------------------------------------------------
+  
+  ------------------------------------------------------------------------------------------
+  
+  
+  CREATE OR REPLACE FUNCTION FNC_RETORNA_FX_ETARIA  --- NOME DA FUNCTION
+
+ ( P_PACIENTE IN NUMBER, P_TIPO VARCHAR2) --- PARAMETROS DE ENTRADA
+ 
+ /*
+ SE P_TIPO = 'I' RETORNA IDADE
+    P_TIPO = 'F' RETORNA FAIXA ETARIA
+ */ 
+ 
+  RETURN VARCHAR2 IS   --- TIPO DE RETORNO
+
+ CURSOR IDADE IS  SELECT Trunc((SYSDATE - DT_NASCIMENTO)/365) 
+                  FROM PACIENTE
+                  WHERE CD_PACIENTE = P_PACIENTE;
+
+  V_IDADE  NUMBER(10);
+  VARIAVEL_A VARCHAR2(200);
+
+BEGIN
+
+  OPEN IDADE; ---- ABRINDO O CURSOR = EXECUTAR O SELECT
+  FETCH IDADE INTO V_IDADE; ---ALIMENTADO A VARIAVEL COM O RSULTADO DO CURSOR
+  CLOSE IDADE;  ----- FECHANDO CURSOR
+
+  IF P_TIPO = 'I' THEN VARIAVEL_A:=V_IDADE;
+
+  ELSIF P_TIPO = 'F' THEN  IF V_IDADE BETWEEN 0 AND 10 THEN VARIAVEL_A:='0 A 10 ANOS';
+  
+                              ELSIF V_IDADE BETWEEN 11 AND 20 THEN VARIAVEL_A:='11 A 20 ANOS';
+
+                              ELSIF V_IDADE BETWEEN 21 AND 30 THEN VARIAVEL_A:='21 A 30 ANOS';
+  
+                              ELSIF V_IDADE BETWEEN 31 AND 40 THEN VARIAVEL_A:='31 A 40 ANOS';
+  
+                              ELSIF V_IDADE BETWEEN 41 AND 50 THEN VARIAVEL_A:='41 A 50 ANOS';
+
+                              ELSE VARIAVEL_A:='MAIOR DE 51 ANOS';
+
+                            END IF;
+  
+  ELSE VARIAVEL_A:='P_TIPO NAO EXISTENTE. (P_TIPO = ''I'' RETORNA IDADE,P_TIPO = ''F'' RETORNA FAIXA ETARIA)';
+
+  END IF;
+
+  RETURN  VAriaVEL_A;  ----- RETORNAR O VALOR SALVO NA VARIAVEL
+
+END;
+/

@@ -1,0 +1,46 @@
+select  paciente.nm_paciente
+, To_Char(paciente.dt_nascimento, 'yyyy') ano_nasc 
+, paciente.ds_endereco                          ---- que buscamos?             colunas
+, Count(atendime.cd_atendimento) nro_atendimento
+from paciente 
+, atendime                                     ---- onde estamos buscando?    tabelas
+where paciente.dt_nascimento BETWEEN to_date('01/01/2000', 'dd/mm/yyyy') AND to_date('31/12/2009', 'dd/mm/yyyy')  ---- como estamos buscando?    condições
+and paciente.cd_paciente = atendime.cd_paciente
+AND paciente.nm_paciente LIKE '%JOAO%CARLOS%'
+GROUP BY  paciente.nm_paciente
+, paciente.dt_nascimento 
+, paciente.ds_endereco
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+SELECT origem,
+       ds_pro_fat,
+       media
+FROM
+  (SELECT 'AMBULATORIAL' origem ,
+                         pro_fat.cd_pro_fat cod_procedimento,
+                         pro_fat.ds_pro_fat ,
+                         round(avg(itreg_amb.vl_unitario), 2) media ,
+                         Round(Sum(itreg_amb.vl_unitario), 2) somatorio ,
+                         Count(itreg_amb.vl_unitario) contagem
+   FROM itreg_amb ,
+        pro_fat
+   WHERE Trunc(hr_lancamento) >= To_Date('01/01/2015', 'dd/mm/yyyy')
+     AND pro_fat.cd_pro_fat = itreg_amb.cd_pro_fat
+   GROUP BY pro_fat.cd_pro_fat ,
+            pro_fat.ds_pro_fat
+   UNION ALL SELECT 'INTERNACAO' origem ,
+                                 pro_fat.cd_pro_fat cod_procedimento ,
+                                 pro_fat.ds_pro_fat ,
+                                 round(avg(itreg_fat.vl_unitario), 2) media ,
+                                 Round(Sum(itreg_fat.vl_unitario), 2) somatorio ,
+                                 Count(itreg_fat.vl_unitario) contagem
+   FROM itreg_fat ,
+        pro_fat
+   WHERE Trunc(hr_lancamento) >= To_Date('01/01/2015', 'dd/mm/yyyy')
+     AND pro_fat.cd_pro_fat = itreg_fat.cd_pro_fat
+   GROUP BY pro_fat.cd_pro_fat ,
+            pro_fat.ds_pro_fat)
+WHERE media >= 10000
+ORDER BY 3 DESC            
